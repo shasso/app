@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Search, FileText, Clock } from 'lucide-react';
+import { Plus, FileText, Clock } from 'lucide-react';
 import { metadataApi } from '../utils/api';
 import type { MetadataRecord } from '../types';
 
 const Dashboard = () => {
   const [recentRecords, setRecentRecords] = useState<MetadataRecord[]>([]);
+  const [totalRecords, setTotalRecords] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -13,6 +14,8 @@ const Dashboard = () => {
     const fetchRecentRecords = async () => {
       try {
         const records = await metadataApi.getAllRecords();
+        setTotalRecords(records.length);
+        
         // Sort by updatedAt/createdAt and take the first 5
         const sorted = records
           .sort((a, b) => {
@@ -51,53 +54,66 @@ const Dashboard = () => {
       {/* Welcome section */}
       <div className="text-center">
         <h1 className="text-3xl font-bold text-gray-900 mb-4">
-          Welcome to Metadata Editor
+          Metadata Editor Dashboard
         </h1>
         <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-          Create, manage, and organize metadata for your corpus items with dynamic fields
+          Manage and organize metadata for your corpus items with dynamic fields
           and flexible data structures.
         </p>
       </div>
 
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Link
-          to="/create"
-          className="group bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6 border border-gray-200"
-        >
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <Plus className="h-8 w-8 text-blue-600 group-hover:text-blue-700" />
+              <FileText className="h-8 w-8 text-blue-600" />
             </div>
             <div className="ml-4">
-              <h3 className="text-lg font-medium text-gray-900 group-hover:text-blue-700">
-                Create New Record
+              <h3 className="text-lg font-medium text-gray-900">
+                Total Records
               </h3>
-              <p className="text-gray-600">
-                Add a new metadata record with custom fields
+              <p className="text-2xl font-bold text-blue-600">
+                {totalRecords}
               </p>
             </div>
           </div>
-        </Link>
+        </div>
 
-        <Link
-          to="/search"
-          className="group bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6 border border-gray-200"
-        >
+        <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <Search className="h-8 w-8 text-green-600 group-hover:text-green-700" />
+              <Clock className="h-8 w-8 text-green-600" />
             </div>
             <div className="ml-4">
-              <h3 className="text-lg font-medium text-gray-900 group-hover:text-green-700">
-                Search Records
+              <h3 className="text-lg font-medium text-gray-900">
+                Recently Updated
               </h3>
-              <p className="text-gray-600">
-                Find existing records by ID or browse all records
+              <p className="text-2xl font-bold text-green-600">
+                {recentRecords.filter(r => r.updatedAt && r.updatedAt !== r.createdAt).length}
               </p>
             </div>
           </div>
-        </Link>
+        </div>
+
+        <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <Plus className="h-8 w-8 text-purple-600" />
+            </div>
+            <div className="ml-4">
+              <h3 className="text-lg font-medium text-gray-900">
+                Quick Start
+              </h3>
+              <Link 
+                to="/create"
+                className="text-purple-600 hover:text-purple-700 font-medium"
+              >
+                Create New Record →
+              </Link>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Recent Records */}

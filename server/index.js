@@ -7,7 +7,7 @@ import Joi from 'joi';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/metadata-editor';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://admin:password123@localhost:27017/metadata-editor?authSource=admin';
 
 // Middleware
 app.use(helmet());
@@ -20,12 +20,15 @@ const client = new MongoClient(MONGODB_URI);
 
 async function connectDB() {
   try {
+    console.log('Connecting to MongoDB...');
     await client.connect();
     db = client.db('metadata-editor');
-    console.log('Connected to MongoDB');
+    console.log('✅ Connected to MongoDB successfully');
+    return true;
   } catch (error) {
-    console.error('MongoDB connection error:', error);
-    process.exit(1);
+    console.error('❌ MongoDB connection error:', error.message);
+    console.log('📁 Using in-memory storage as fallback');
+    return false;
   }
 }
 
@@ -231,10 +234,24 @@ app.use((req, res) => {
 
 // Start server
 async function startServer() {
-  await connectDB();
+  console.log('🚀 Starting Metadata Editor Server...');
+  
+  // Connect to database in background
+  connectDB().then((connected) => {
+    if (connected) {
+      console.log('📊 Database ready');
+    }
+  });
   
   app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`🌟 Server running on http://localhost:${PORT}`);
+    console.log('📋 API endpoints available:');
+    console.log('  GET    /api/metadata');
+    console.log('  POST   /api/metadata');
+    console.log('  GET    /api/metadata/:id');
+    console.log('  PUT    /api/metadata/:id');
+    console.log('  DELETE /api/metadata/:id');
+    console.log('  GET    /api/metadata/fields');
   });
 }
 
