@@ -58,6 +58,12 @@ metadata-editor/
 │   │   │   └── api.ts           # API client with fallback
 │   │   └── main.tsx             # Application entry point
 │   ├── server/                  # Backend source code
+│   │   ├── data/                # Configuration data files
+│   │   │   ├── genre-options.json      # Genre dropdown options
+│   │   │   ├── dialect-options.json    # Dialect dropdown options
+│   │   │   └── README.md               # Data management guide
+│   │   ├── utils/               # Server utilities
+│   │   │   └── options-loader.js       # JSON options loader
 │   │   ├── index.js             # Express server
 │   │   └── package.json         # Backend dependencies
 │   ├── docker-compose.yml       # Docker configuration
@@ -284,11 +290,48 @@ The application supports these predefined fields:
 
 ## Development
 
+### Configuring Dropdown Options
+
+The application uses file-based configuration for dropdown field options, making it easy to add new values without code changes.
+
+#### Managing Genre and Dialect Options
+
+**Location**: 
+- `server/data/genre-options.json` - Genre dropdown options
+- `server/data/dialect-options.json` - Dialect dropdown options
+
+**To add new options**:
+1. Edit the appropriate JSON file
+2. Add new values to the array:
+   ```json
+   [
+     "existing-option-1",
+     "existing-option-2",
+     "new-option-here"
+   ]
+   ```
+3. Restart the backend server
+4. New options appear in dropdown menus
+
+**Example - Adding new genres**:
+```json
+[
+  "literature", "language", "new testament", "old testament",
+  "magazine", "apocrypha", "academic", "poetry", "history", 
+  "dictionary", "grammar", "textbook"
+]
+```
+
+**Current available options**:
+- **Genre**: literature, language, new testament, old testament, magazine, apocrypha, academic, poetry, history, dictionary
+- **Dialect**: urmi, standard, other, jilu, tkhuma, baz
+
 ### Adding New Fields
 
 1. Update the Joi schema in `server/index.js`
 2. Add field definition in the `/api/metadata/fields` endpoint
 3. Update the frontend form components
+4. For dropdown fields, create a new data file in `server/data/` if needed
 
 ### Database Operations
 

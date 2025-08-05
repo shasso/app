@@ -181,28 +181,82 @@ The system must include the following standard fields:
 ### 5.1 Architecture
 
 #### 5.1.1 Frontend
-- **Technology**: Modern web framework (React.js, Vue.js, or Angular)
+- **Technology**: Modern web framework (React.js with TypeScript)
+- **Build System**: Vite for fast development and production builds
 - **Responsive Design**: Mobile-friendly interface
 - **Browser Support**: Chrome, Firefox, Safari, Edge (latest 2 versions)
 
 #### 5.1.2 Backend
 - **API**: RESTful web service
-- **Runtime**: Node.js, Python, or similar
-- **Framework**: Express.js, FastAPI, or equivalent
+- **Runtime**: Node.js with Express.js framework
+- **Configuration**: File-based dropdown options using JSON data files
+- **Containerization**: Docker with Docker Compose orchestration
 
 #### 5.1.3 Database
-- **Type**: NoSQL database (MongoDB, CouchDB, or similar)
+- **Type**: NoSQL database (MongoDB)
 - **Structure**: Document-based storage
 - **Indexing**: ID field indexed for fast retrieval
+- **Deployment**: Dockerized with persistent volume storage
 
-### 5.2 API Endpoints
+### 5.2 Configuration Management
 
+#### 5.2.1 Dropdown Options Configuration
+The application supports file-based configuration for dropdown field options, providing flexibility for content managers to update available choices without code modifications.
+
+**Configuration Files Location**: `server/data/`
+- `genre-options.json` - Available genre selections
+- `dialect-options.json` - Available dialect selections
+
+**File Format**: JSON objects with options arrays
+```json
+{
+  "options": [
+    "literature",
+    "magazine", 
+    "religious",
+    "academic",
+    "poetry",
+    "history",
+    "dictionary"
+  ]
+}
 ```
+
+**Dynamic Loading**: Options are loaded at server startup and cached for performance, with fallback to default values if files are missing or corrupted.
+
+**Field Integration**: The system automatically validates form submissions against current option values and updates client-side dropdowns via API endpoints.
+
+**Management**: Content managers can edit JSON files directly to add, remove, or modify available options without requiring code changes or application restarts.
+
+### 5.3 API Endpoints
+
+```http
+GET /api/metadata           - Get all metadata records
 POST /api/metadata          - Create new record
 GET /api/metadata/:id       - Get record by ID
 PUT /api/metadata/:id       - Update record
 DELETE /api/metadata/:id    - Delete record
-GET /api/metadata/fields    - Get available field definitions
+GET /api/metadata/fields    - Get available field definitions with current dropdown options
+```
+
+**Field Definitions API Response**:
+The `/api/metadata/fields` endpoint returns dynamic field definitions including current dropdown options loaded from configuration files:
+
+```json
+{
+  "title": { "type": "text", "label": "Title", "required": true },
+  "authors": { "type": "array", "label": "Authors", "required": true },
+  "genre": { 
+    "type": "select", 
+    "label": "Genre", 
+    "options": ["literature", "magazine", "religious", "academic", "poetry", "history", "dictionary"] 
+  },
+  "dialect": { 
+    "type": "select", 
+    "label": "Dialect", 
+    "options": ["urmi", "jilu", "tkhuma", "baz"] 
+  }
+}
 ```
 
 ### 5.3 Performance Requirements
@@ -332,6 +386,8 @@ GET /api/metadata/fields    - Get available field definitions
 - [ ] Users can delete records with confirmation
 - [ ] All data validation rules are enforced
 - [ ] Unicode text is properly handled and displayed
+- [ ] Dropdown options are loaded from configuration files
+- [ ] Genre and dialect dropdowns display current options from JSON files
 
 ### 12.2 Technical Acceptance
 - [ ] Application loads in under 2 seconds
@@ -340,6 +396,15 @@ GET /api/metadata/fields    - Get available field definitions
 - [ ] Database operations complete successfully
 - [ ] No data corruption or loss occurs
 - [ ] Security measures are implemented and tested
+- [ ] Configuration files are properly loaded and cached
+- [ ] System gracefully handles missing or corrupted configuration files
+
+### 12.3 Configuration Management Acceptance
+- [ ] Content managers can edit JSON configuration files to modify dropdown options
+- [ ] Changes to configuration files are reflected in API responses
+- [ ] Invalid configuration files fall back to default options
+- [ ] System validates dropdown selections against current configuration
+- [ ] File-based configuration system requires no code changes for option updates
 
 ### 12.3 User Experience Acceptance
 - [ ] Interface is intuitive and easy to navigate

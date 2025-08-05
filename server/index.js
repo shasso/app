@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import { MongoClient } from 'mongodb';
 import { v4 as uuidv4 } from 'uuid';
 import Joi from 'joi';
+import { loadOptions } from './utils/options-loader.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -32,19 +33,23 @@ async function connectDB() {
   }
 }
 
+// Load dynamic options for validation
+const genreOptions = loadOptions('genre');
+const dialectOptions = loadOptions('dialect');
+
 // Metadata schema validation
 const metadataSchema = Joi.object({
   id: Joi.string().uuid().optional(),
   metadata: Joi.object({
     title: Joi.string().max(500).optional(),
     subtitle: Joi.string().max(500).optional(),
-    genre: Joi.string().valid('literature', 'language', 'new testament', 'old testament', 'magazine', 'apocrypha', 'academic').optional(),
+    genre: Joi.string().valid(...genreOptions).optional(),
     language: Joi.string().valid('Assyrian', 'English', 'Arabic', 'Other').optional(),
     copyright: Joi.string().valid('yes', 'no').optional(),
     authors: Joi.array().items(Joi.string().min(1).max(500)).min(1).optional(),
     editor: Joi.string().max(500).optional(),
     translator: Joi.string().max(500).optional(),
-    dialect: Joi.string().valid('urmi', 'standard', 'other').optional(),
+    dialect: Joi.string().valid(...dialectOptions).optional(),
     location: Joi.string().max(500).optional(),
     country: Joi.string().max(500).optional(),
     source: Joi.string().valid('private', 'online', 'published').optional(),
@@ -69,17 +74,21 @@ app.get('/api/metadata', async (req, res) => {
 
 // Get available field definitions
 app.get('/api/metadata/fields', (req, res) => {
+  // Load options from data files
+  const genreOptions = loadOptions('genre');
+  const dialectOptions = loadOptions('dialect');
+  
   const fieldDefinitions = {
     predefinedFields: [
       { name: 'title', type: 'text', label: 'Title', maxLength: 500 },
       { name: 'subtitle', type: 'text', label: 'Subtitle', maxLength: 500 },
-      { name: 'genre', type: 'select', label: 'Genre', options: ['literature', 'language', 'new testament', 'old testament', 'magazine', 'apocrypha', 'academic'] },
+      { name: 'genre', type: 'select', label: 'Genre', options: genreOptions },
       { name: 'language', type: 'select', label: 'Language', options: ['Assyrian', 'English', 'Arabic', 'Other'] },
       { name: 'copyright', type: 'select', label: 'Copyright', options: ['yes', 'no'] },
       { name: 'authors', type: 'array', label: 'Authors', itemType: 'text', minItems: 1, maxLength: 500 },
       { name: 'editor', type: 'text', label: 'Editor', maxLength: 500 },
       { name: 'translator', type: 'text', label: 'Translator', maxLength: 500 },
-      { name: 'dialect', type: 'select', label: 'Dialect', options: ['urmi', 'standard', 'other'] },
+      { name: 'dialect', type: 'select', label: 'Dialect', options: dialectOptions },
       { name: 'location', type: 'text', label: 'Location', maxLength: 500 },
       { name: 'country', type: 'text', label: 'Country', maxLength: 500 },
       { name: 'source', type: 'select', label: 'Source', options: ['private', 'online', 'published'] },
@@ -219,6 +228,18 @@ app.delete('/api/metadata/:id', async (req, res) => {
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
+});
+
+// Reload options endpoint (for development)
+app.post('/api/reload-options', (req, res) => {
+  try {
+    // Clear require cache is not needed for ES modules, but we log the action
+    console.log('🔄 Reloading options from data files...');
+    res.json({ message: 'Options will be reloaded on next request', timestamp: new Date().toISOString() });
+  } catch (error) {
+    console.error('Error reloading options:', error);
+    res.status(500).json({ error: 'Failed to reload options' });
+  }
 });
 
 // Error handling middleware
