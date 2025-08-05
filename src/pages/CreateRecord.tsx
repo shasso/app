@@ -100,13 +100,19 @@ const CreateRecord = () => {
     try {
       // Filter out empty values
       const cleanedData = Object.entries(formData).reduce((acc, [key, value]) => {
+        // Keep values that are not undefined, not empty string, and not empty arrays
+        // For numbers, also keep 0 as a valid value
         if (value !== undefined && value !== '' && !(Array.isArray(value) && value.length === 0)) {
           if (Array.isArray(value)) {
             const filteredArray = value.filter(item => item !== '');
             if (filteredArray.length > 0) {
               acc[key] = filteredArray;
             }
-          } else {
+          } else if (typeof value === 'number' || (typeof value === 'string' && value.trim() !== '')) {
+            // Include numbers (including 0) and non-empty strings
+            acc[key] = value;
+          } else if (typeof value !== 'string') {
+            // Include other non-string types (booleans, etc.)
             acc[key] = value;
           }
         }
@@ -231,7 +237,7 @@ const CreateRecord = () => {
           <input
             type="number"
             value={value || ''}
-            onChange={(e) => handleFieldChange(fieldName, e.target.value ? parseInt(e.target.value) : undefined)}
+            onChange={(e) => handleFieldChange(fieldName, e.target.value ? parseInt(e.target.value) : '')}
             min={fieldDef.min}
             max={fieldDef.max}
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"

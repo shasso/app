@@ -67,6 +67,31 @@ app.get('/api/metadata', async (req, res) => {
   }
 });
 
+// Get available field definitions
+app.get('/api/metadata/fields', (req, res) => {
+  const fieldDefinitions = {
+    predefinedFields: [
+      { name: 'title', type: 'text', label: 'Title', maxLength: 500 },
+      { name: 'subtitle', type: 'text', label: 'Subtitle', maxLength: 500 },
+      { name: 'genre', type: 'select', label: 'Genre', options: ['literature', 'language', 'new testament', 'old testament', 'magazine', 'apocrypha', 'academic'] },
+      { name: 'language', type: 'select', label: 'Language', options: ['Assyrian', 'English', 'Arabic', 'Other'] },
+      { name: 'copyright', type: 'select', label: 'Copyright', options: ['yes', 'no'] },
+      { name: 'authors', type: 'array', label: 'Authors', itemType: 'text', minItems: 1, maxLength: 500 },
+      { name: 'editor', type: 'text', label: 'Editor', maxLength: 500 },
+      { name: 'translator', type: 'text', label: 'Translator', maxLength: 500 },
+      { name: 'dialect', type: 'select', label: 'Dialect', options: ['urmi', 'standard', 'other'] },
+      { name: 'location', type: 'text', label: 'Location', maxLength: 500 },
+      { name: 'country', type: 'text', label: 'Country', maxLength: 500 },
+      { name: 'source', type: 'select', label: 'Source', options: ['private', 'online', 'published'] },
+      { name: 'num_pages', type: 'number', label: 'Number of Pages', min: 1 },
+      { name: 'pub_date', type: 'year', label: 'Publication Date', min: 1000, max: new Date().getFullYear() },
+      { name: 'edition', type: 'text', label: 'Edition', maxLength: 500 }
+    ]
+  };
+  
+  res.json(fieldDefinitions);
+});
+
 // Get metadata record by ID
 app.get('/api/metadata/:id', async (req, res) => {
   try {
@@ -189,31 +214,6 @@ app.delete('/api/metadata/:id', async (req, res) => {
     console.error('Error deleting record:', error);
     res.status(500).json({ error: 'Failed to delete record' });
   }
-});
-
-// Get available field definitions
-app.get('/api/metadata/fields', (req, res) => {
-  const fieldDefinitions = {
-    predefinedFields: [
-      { name: 'title', type: 'text', label: 'Title', maxLength: 500 },
-      { name: 'subtitle', type: 'text', label: 'Subtitle', maxLength: 500 },
-      { name: 'genre', type: 'select', label: 'Genre', options: ['literature', 'language', 'new testament', 'old testament', 'magazine', 'apocrypha', 'academic'] },
-      { name: 'language', type: 'select', label: 'Language', options: ['Assyrian', 'English', 'Arabic', 'Other'] },
-      { name: 'copyright', type: 'select', label: 'Copyright', options: ['yes', 'no'] },
-      { name: 'authors', type: 'array', label: 'Authors', itemType: 'text', minItems: 1, maxLength: 500 },
-      { name: 'editor', type: 'text', label: 'Editor', maxLength: 500 },
-      { name: 'translator', type: 'text', label: 'Translator', maxLength: 500 },
-      { name: 'dialect', type: 'select', label: 'Dialect', options: ['urmi', 'standard', 'other'] },
-      { name: 'location', type: 'text', label: 'Location', maxLength: 500 },
-      { name: 'country', type: 'text', label: 'Country', maxLength: 500 },
-      { name: 'source', type: 'select', label: 'Source', options: ['private', 'online', 'published'] },
-      { name: 'num_pages', type: 'number', label: 'Number of Pages', min: 1 },
-      { name: 'pub_date', type: 'year', label: 'Publication Date', min: 1000, max: new Date().getFullYear() },
-      { name: 'edition', type: 'text', label: 'Edition', maxLength: 500 }
-    ]
-  };
-  
-  res.json(fieldDefinitions);
 });
 
 // Health check endpoint
