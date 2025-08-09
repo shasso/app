@@ -22,7 +22,8 @@ export function loadOptions(optionType) {
 function getFallbackOptions(optionType) {
   const fallbacks = {
     'genre': ['literature', 'language', 'new testament', 'old testament', 'magazine', 'apocrypha', 'academic'],
-    'dialect': ['urmi', 'standard', 'other']
+    'dialect': ['urmi', 'standard', 'other'],
+    'source': ['private', 'online', 'published']
   };
   
   return fallbacks[optionType] || [];

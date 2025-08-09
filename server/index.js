@@ -36,6 +36,7 @@ async function connectDB() {
 // Load dynamic options for validation
 const genreOptions = loadOptions('genre');
 const dialectOptions = loadOptions('dialect');
+const sourceOptions = loadOptions('source');
 
 // Metadata schema validation
 const metadataSchema = Joi.object({
@@ -52,7 +53,7 @@ const metadataSchema = Joi.object({
     dialect: Joi.string().valid(...dialectOptions).optional(),
     location: Joi.string().max(500).optional(),
     country: Joi.string().max(500).optional(),
-    source: Joi.string().valid('private', 'online', 'published').optional(),
+    source: Joi.string().valid(...sourceOptions).optional(),
     num_pages: Joi.number().integer().positive().optional(),
     pub_date: Joi.number().integer().min(1000).max(new Date().getFullYear()).optional(),
     edition: Joi.string().max(500).optional()
@@ -77,6 +78,7 @@ app.get('/api/metadata/fields', (req, res) => {
   // Load options from data files
   const genreOptions = loadOptions('genre');
   const dialectOptions = loadOptions('dialect');
+  const sourceOptions = loadOptions('source');
   
   const fieldDefinitions = {
     predefinedFields: [
@@ -91,7 +93,7 @@ app.get('/api/metadata/fields', (req, res) => {
       { name: 'dialect', type: 'select', label: 'Dialect', options: dialectOptions },
       { name: 'location', type: 'text', label: 'Location', maxLength: 500 },
       { name: 'country', type: 'text', label: 'Country', maxLength: 500 },
-      { name: 'source', type: 'select', label: 'Source', options: ['private', 'online', 'published'] },
+      { name: 'source', type: 'select', label: 'Source', options: sourceOptions },
       { name: 'num_pages', type: 'number', label: 'Number of Pages', min: 1 },
       { name: 'pub_date', type: 'year', label: 'Publication Date', min: 1000, max: new Date().getFullYear() },
       { name: 'edition', type: 'text', label: 'Edition', maxLength: 500 }

@@ -5,6 +5,7 @@ A full-stack web application for managing and organizing metadata for corpus ite
 ## Features
 
 - ✅ **Dynamic Metadata Fields** - Support for predefined and custom fields
+- ✅ **File-based Configuration** - Easily configurable dropdown options via JSON files
 - ✅ **Multiple Authors Support** - Array-based author field management
 - ✅ **GUID-based Records** - UUID identification for all records
 - ✅ **Full CRUD Operations** - Create, Read, Update, Delete metadata records
@@ -61,6 +62,7 @@ metadata-editor/
 │   │   ├── data/                # Configuration data files
 │   │   │   ├── genre-options.json      # Genre dropdown options
 │   │   │   ├── dialect-options.json    # Dialect dropdown options
+│   │   │   ├── source-options.json     # Source dropdown options
 │   │   │   └── README.md               # Data management guide
 │   │   ├── utils/               # Server utilities
 │   │   │   └── options-loader.js       # JSON options loader
@@ -275,15 +277,15 @@ The application supports these predefined fields:
 - **title** (text) - Record title
 - **subtitle** (text) - Record subtitle
 - **authors** (array) - List of authors
-- **genre** (select) - literature, language, new testament, old testament, magazine, apocrypha, academic
+- **genre** (select) - literature, language, new testament, old testament, magazine, apocrypha, academic, poetry, history, dictionary, religion, biography, folklore
 - **language** (select) - Assyrian, English, Arabic, Other
 - **copyright** (select) - yes, no
 - **editor** (text) - Editor name
 - **translator** (text) - Translator name
-- **dialect** (select) - urmi, standard, other
+- **dialect** (select) - urmi, standard, other, jilu, tkhuma, baz
 - **location** (text) - Location
 - **country** (text) - Country
-- **source** (select) - private, online, published
+- **source** (select) - private, online, published, manuscript, archive, library, personal collection, digital repository, book
 - **num_pages** (number) - Number of pages
 - **pub_date** (year) - Publication year
 - **edition** (text) - Edition information
@@ -294,11 +296,12 @@ The application supports these predefined fields:
 
 The application uses file-based configuration for dropdown field options, making it easy to add new values without code changes.
 
-#### Managing Genre and Dialect Options
+#### Managing Dropdown Options
 
 **Location**: 
 - `server/data/genre-options.json` - Genre dropdown options
 - `server/data/dialect-options.json` - Dialect dropdown options
+- `server/data/source-options.json` - Source dropdown options
 
 **To add new options**:
 1. Edit the appropriate JSON file
@@ -310,7 +313,7 @@ The application uses file-based configuration for dropdown field options, making
      "new-option-here"
    ]
    ```
-3. Restart the backend server
+3. Restart the backend server (or rebuild Docker container)
 4. New options appear in dropdown menus
 
 **Example - Adding new genres**:
@@ -318,20 +321,57 @@ The application uses file-based configuration for dropdown field options, making
 [
   "literature", "language", "new testament", "old testament",
   "magazine", "apocrypha", "academic", "poetry", "history", 
-  "dictionary", "grammar", "textbook"
+  "dictionary", "religion", "biography", "folklore", "grammar"
 ]
 ```
 
 **Current available options**:
-- **Genre**: literature, language, new testament, old testament, magazine, apocrypha, academic, poetry, history, dictionary
+- **Genre**: literature, language, new testament, old testament, magazine, apocrypha, academic, poetry, history, dictionary, religion, biography, folklore
 - **Dialect**: urmi, standard, other, jilu, tkhuma, baz
+- **Source**: private, online, published, manuscript, archive, library, personal collection, digital repository, book
+
+#### Docker Configuration Updates
+
+When running in Docker, after editing configuration files:
+
+```bash
+# Rebuild and restart backend service
+docker-compose build --no-cache backend
+docker-compose up -d backend
+```
+
+#### Development Mode Updates
+
+When running in development mode:
+
+```bash
+# Simply restart the backend server
+cd server
+# Ctrl+C to stop, then restart
+node index.js
+```
 
 ### Adding New Fields
 
+#### For Text/Number Fields:
 1. Update the Joi schema in `server/index.js`
 2. Add field definition in the `/api/metadata/fields` endpoint
 3. Update the frontend form components
-4. For dropdown fields, create a new data file in `server/data/` if needed
+
+#### For New Dropdown Fields:
+1. Create a new JSON file in `server/data/` (e.g., `language-options.json`)
+2. Update `server/utils/options-loader.js` to include fallback options
+3. Update the Joi schema to use `loadOptions('your-field')`
+4. Add field definition in the `/api/metadata/fields` endpoint
+5. Update the frontend form components
+
+#### Extending Existing Dropdown Fields:
+Simply edit the corresponding JSON file in `server/data/`:
+- `genre-options.json` - Add/remove genre options
+- `dialect-options.json` - Add/remove dialect options  
+- `source-options.json` - Add/remove source options
+
+No code changes required for existing dropdown fields!
 
 ### Database Operations
 
@@ -448,5 +488,5 @@ For support, please create an issue in the repository or contact the development
 
 ---
 
-**Last Updated**: August 4, 2025
-**Version**: 1.0.0
+**Last Updated**: August 9, 2025
+**Version**: 1.1.0
