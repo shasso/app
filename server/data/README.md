@@ -1,6 +1,6 @@
-# Server Data Configuration
+# Server Data Configuration & Search System
 
-This directory contains JSON files that define the available options for select fields in the metadata editor and documentation for the search system.
+This directory contains JSON files that define the available options for select fields in the metadata editor, along with comprehensive documentation for the advanced search system.
 
 ## Configuration Files
 
@@ -20,6 +20,7 @@ Contains the available genre options for the "Genre" dropdown field.
 - dictionary
 - religion
 - biography
+- folklore
 
 ### `dialect-options.json`
 Contains the available dialect options for the "Dialect" dropdown field.
@@ -44,8 +45,49 @@ Contains the available source options for the "Source" dropdown field.
 - library
 - personal collection
 - digital repository
+- book
+
+## 🎨 Integration with Beautiful Search Interface
+
+All dropdown fields are automatically integrated with the stunning new search interface featuring:
+
+### **Visual Integration**
+- **Gradient Styling**: Dropdown fields appear with beautiful indigo-purple-pink gradients
+- **Type Badges**: Purple badges indicate dropdown field types in advanced search
+- **Icon Mapping**: Consistent iconography (Tag for genre, Database for source, etc.)
+- **Visual Feedback**: Hover effects and smooth transitions for all dropdown interactions
+
+### **Search Functionality**
+- **Exact Match**: Dropdown values use precise string matching for accurate results
+- **Auto-validation**: Search parameters validated against current configuration options
+- **Performance**: Indexed fields for lightning-fast search operations
+- **API Integration**: Available through the `/api/metadata/search/fields` endpoint
 
 ## How to Add New Options
+
+### 🔄 **Development Mode Updates**
+
+1. **Edit the JSON file**: Open the appropriate file (`genre-options.json`, `dialect-options.json`, or `source-options.json`)
+2. **Add new values**: Add new options to the array, following the existing format
+3. **Save the file**: Save your changes
+4. **Restart the server**: Restart the backend server to load the new options
+
+```bash
+# Restart backend server
+cd server
+# Ctrl+C to stop, then restart
+node index.js
+```
+
+### 🐳 **Docker Mode Updates**
+
+When running with Docker Compose, rebuild the backend container:
+
+```bash
+# Rebuild and restart backend service
+docker compose build --no-cache backend
+docker compose up -d backend
+```
 
 1. **Edit the JSON file**: Open the appropriate file (`genre-options.json`, `dialect-options.json`, or `source-options.json`)
 2. **Add new values**: Add new options to the array, following the existing format

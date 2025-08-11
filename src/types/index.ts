@@ -30,3 +30,35 @@ export interface ValidationError {
   field: string;
   message: string;
 }
+
+// Search-related types
+export interface SearchField {
+  label: string;
+  description: string;
+  type: 'exact' | 'text' | 'array' | 'number' | 'range';
+}
+
+export interface SearchFields {
+  [fieldName: string]: SearchField;
+}
+
+export interface SearchParams {
+  [fieldName: string]: string;
+}
+
+export interface SearchResponse {
+  success: boolean;
+  query: SearchParams;
+  mongoQuery?: any;
+  results: MetadataRecord[];
+  totalCount: number;
+  returnedCount: number;
+  hasMore: boolean;
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    hasNext: boolean;
+  };
+  errors?: string[];
+}
