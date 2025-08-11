@@ -5,6 +5,7 @@ import { MongoClient } from 'mongodb';
 import { v4 as uuidv4 } from 'uuid';
 import Joi from 'joi';
 import { loadOptions } from './utils/options-loader.js';
+import { MetadataSearchEngine } from './utils/search-engine.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -15,8 +16,9 @@ app.use(helmet());
 app.use(cors());
 app.use(express.json());
 
-// MongoDB connection
+//  MongoDB connection
 let db;
+let searchEngine;
 const client = new MongoClient(MONGODB_URI);
 
 async function connectDB() {
@@ -24,7 +26,12 @@ async function connectDB() {
     console.log('Connecting to MongoDB...');
     await client.connect();
     db = client.db('metadata-editor');
+    
+    // Initialize search engine
+    searchEngine = new MetadataSearchEngine(db);
+    
     console.log('✅ Connected to MongoDB successfully');
+    console.log('🔍 Search engine initialized');
     return true;
   } catch (error) {
     console.error('❌ MongoDB connection error:', error.message);
@@ -101,6 +108,108 @@ app.get('/api/metadata/fields', (req, res) => {
   };
   
   res.json(fieldDefinitions);
+});
+
+// Get searchable fields information
+app.get('/api/metadata/search/fields', (req, res) => {
+  try {
+    if (!searchEngine) {
+      return res.status(503).json({ error: 'Search engine not available' });
+    }
+    
+    const searchableFields = searchEngine.getSearchableFields();
+    res.json({
+      searchableFields,
+      description: 'Available fields for searching metadata records',
+      examples: {
+        'Search by ID': '/api/metadata/search?id=550e8400-e29b-41d4-a716-446655440000',
+        'Search by title': '/api/metadata/search?title=assyrian',
+        'Search by author': '/api/metadata/search?authors=daniel',
+        'Search by genre': '/api/metadata/search?genre=literature',
+        'Search by year': '/api/metadata/search?year=2020',
+        'Search by country': '/api/metadata/search?country=iraq',
+        'Multiple fields': '/api/metadata/search?genre=literature&year=2020&country=iraq'
+      }
+    });
+  } catch (error) {
+    console.error('Error getting searchable fields:', error);
+    res.status(500).json({ error: 'Failed to get searchable fields' });
+  }
+});
+
+// Search metadata records
+app.get('/api/metadata/search', async (req, res) => {
+  try {
+    if (!searchEngine) {
+      return res.status(503).json({ error: 'Search engine not available' });
+    }
+
+    // Extract search parameters from query string
+    const searchParams = {};
+    const options = {};
+
+    // Parse search parameters
+    Object.entries(req.query).forEach(([key, value]) => {
+      if (['limit', 'skip', 'page'].includes(key)) {
+        // Handle pagination parameters
+        if (key === 'limit') options.limit = Math.min(parseInt(value) || 20, 100);
+        if (key === 'skip') options.skip = parseInt(value) || 0;
+        if (key === 'page') {
+          const page = parseInt(value) || 1;
+          const limit = options.limit || 20;
+          options.skip = (page - 1) * limit;
+        }
+      } else if (key === 'sort') {
+        // Handle sorting
+        try {
+          options.sort = JSON.parse(value);
+        } catch {
+          options.sort = { 'metadata.title': 1 }; // Default sort
+        }
+      } else if (value && value.trim() !== '') {
+        // Add to search parameters if not empty
+        searchParams[key] = value.trim();
+      }
+    });
+
+    // Validate that at least one search parameter is provided
+    if (Object.keys(searchParams).length === 0) {
+      return res.status(400).json({ 
+        error: 'At least one search parameter is required',
+        availableFields: Object.keys(searchEngine.getSearchableFields()),
+        examples: {
+          'Search by title': '/api/metadata/search?title=assyrian',
+          'Search by author': '/api/metadata/search?authors=daniel'
+        }
+      });
+    }
+
+    // Execute search
+    const searchResult = await searchEngine.search(searchParams, options);
+
+    if (!searchResult.success) {
+      return res.status(400).json({
+        error: 'Search validation failed',
+        details: searchResult.errors,
+        availableFields: Object.keys(searchEngine.getSearchableFields())
+      });
+    }
+
+    // Return results
+    res.json({
+      ...searchResult,
+      pagination: {
+        page: Math.floor((options.skip || 0) / (options.limit || 20)) + 1,
+        limit: options.limit || 20,
+        total: searchResult.totalCount,
+        hasNext: searchResult.hasMore
+      }
+    });
+
+  } catch (error) {
+    console.error('Error searching metadata:', error);
+    res.status(500).json({ error: 'Failed to search metadata records' });
+  }
 });
 
 // Get metadata record by ID
@@ -275,6 +384,12 @@ async function startServer() {
     console.log('  PUT    /api/metadata/:id');
     console.log('  DELETE /api/metadata/:id');
     console.log('  GET    /api/metadata/fields');
+    console.log('  GET    /api/metadata/search/fields');
+    console.log('  GET    /api/metadata/search');
+    console.log('🔍 Search examples:');
+    console.log('  /api/metadata/search?title=assyrian');
+    console.log('  /api/metadata/search?authors=daniel');
+    console.log('  /api/metadata/search?genre=literature&year=2020');
   });
 }
 

@@ -1,8 +1,8 @@
-# Managing Dropdown Options
+# Server Data Configuration
 
-This directory contains JSON files that define the available options for select fields in the metadata editor.
+This directory contains JSON files that define the available options for select fields in the metadata editor and documentation for the search system.
 
-## Files
+## Configuration Files
 
 ### `genre-options.json`
 Contains the available genre options for the "Genre" dropdown field.
@@ -184,6 +184,112 @@ curl -X POST http://localhost:5000/api/reload-options
 **Docker Usage:**
 ```bash
 # After editing JSON files, rebuild and restart backend
-docker-compose build --no-cache backend
-docker-compose up -d backend
+docker compose build --no-cache backend
+docker compose up -d backend
 ```
+
+## Search System
+
+The metadata editor includes an extensible search system that allows searching across multiple fields using different search strategies.
+
+### Available Search Fields
+
+- **ID** (exact match): Search by record UUID
+- **Title** (text search): Case-insensitive search in titles
+- **Subtitle** (text search): Case-insensitive search in subtitles
+- **Authors** (array search): Search within authors array
+- **Genre** (exact match): Search by exact genre match
+- **Country** (text search): Search in country field
+- **Year** (number search): Search by publication year
+
+### Search API Endpoints
+
+#### Get Available Search Fields
+
+```http
+GET /api/metadata/search/fields
+```
+
+Returns information about all searchable fields including labels, descriptions, and types.
+
+#### Execute Search
+
+```http
+GET /api/metadata/search?field=value&field2=value2
+```
+
+**Single Field Examples:**
+
+```http
+GET /api/metadata/search?genre=language
+GET /api/metadata/search?year=2018
+GET /api/metadata/search?authors=daniel
+GET /api/metadata/search?title=grammar
+GET /api/metadata/search?country=iraq
+```
+
+**Multi-Field Examples (AND logic):**
+
+```http
+GET /api/metadata/search?genre=language&year=2018
+GET /api/metadata/search?genre=literature&country=iraq
+GET /api/metadata/search?authors=daniel&year=2020
+```
+
+### Search Response Format
+
+```json
+{
+  "success": true,
+  "query": {
+    "genre": "language",
+    "year": "2018"
+  },
+  "mongoQuery": {
+    "$and": [
+      {"metadata.genre": "language"},
+      {"metadata.pub_date": 2018}
+    ]
+  },
+  "results": [...],
+  "totalCount": 1,
+  "returnedCount": 1,
+  "hasMore": false,
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 1,
+    "hasNext": false
+  }
+}
+```
+
+### Adding New Search Fields
+
+To add new searchable fields, edit `server/utils/search-engine.js` and add to the `searchableFields` configuration:
+
+```javascript
+newField: {
+  path: 'metadata.newField',        // MongoDB path
+  type: 'text',                     // Search type: exact, text, array, number, range
+  label: 'New Field',               // Display label
+  description: 'Search description', // Help text
+  validation: Joi.string().min(1)   // Joi validation schema
+}
+```
+
+**Supported Search Types:**
+
+- **exact**: Exact string match
+- **text**: Case-insensitive text search with regex
+- **array**: Search within array fields
+- **number**: Numeric comparison
+- **range**: Support range queries (e.g., "2020-2023")
+
+### Technical Implementation
+
+- **Strategy Pattern**: Uses pluggable search strategies for different field types
+- **Validation**: Input validation using Joi schemas
+- **MongoDB**: Efficient MongoDB queries with proper indexing
+- **Extensible**: Easy to add new search fields and types
+- **Error Handling**: Comprehensive error handling and user feedback

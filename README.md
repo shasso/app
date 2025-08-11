@@ -9,7 +9,8 @@ A full-stack web application for managing and organizing metadata for corpus ite
 - ✅ **Multiple Authors Support** - Array-based author field management
 - ✅ **GUID-based Records** - UUID identification for all records
 - ✅ **Full CRUD Operations** - Create, Read, Update, Delete metadata records
-- ✅ **Search Functionality** - Find records by ID and browse all records
+- ✅ **Extensible Search System** - Multi-field search with Strategy pattern architecture
+- ✅ **Advanced Search Capabilities** - Search by ID, title, authors, genre, country, year, and more
 - ✅ **Field Validation** - Data integrity with Joi validation
 - ✅ **Unicode Support** - International content support
 - ✅ **Responsive Design** - Mobile-friendly interface
@@ -129,7 +130,7 @@ cd ..
 
 ```bash
 # Start MongoDB container in the background
-docker-compose up -d mongodb
+docker compose up -d mongodb
 
 # Verify MongoDB is running
 docker ps
@@ -172,7 +173,7 @@ The frontend will be available at `http://localhost:5173`
 
 1. **Start MongoDB**:
    ```bash
-   docker-compose up -d mongodb
+   docker compose up -d mongodb
    ```
 
 2. **Start Backend** (in terminal 1):
@@ -190,13 +191,13 @@ The frontend will be available at `http://localhost:5173`
 
 ```bash
 # Start all services
-docker-compose up -d
+docker compose up -d
 
 # View logs
-docker-compose logs -f
+docker compose logs -f
 
 # Stop all services
-docker-compose down
+docker compose down
 ```
 
 ## API Documentation
@@ -248,6 +249,67 @@ DELETE /api/metadata/{id}
 ```http
 GET /api/metadata/fields
 ```
+
+### Search API
+
+The application includes an extensible search system that supports multiple search strategies.
+
+#### Get Available Search Fields
+```http
+GET /api/metadata/search/fields
+```
+
+Returns information about all searchable fields including labels, descriptions, and search types.
+
+#### Execute Search
+```http
+GET /api/metadata/search?field=value&field2=value2
+```
+
+**Available Search Fields:**
+- **id** (exact match) - Search by record UUID
+- **title** (text search) - Case-insensitive search in titles
+- **subtitle** (text search) - Case-insensitive search in subtitles
+- **authors** (array search) - Search within authors array
+- **genre** (exact match) - Search by exact genre match
+- **country** (text search) - Search in country field
+- **year** (number search) - Search by publication year
+
+**Single Field Examples:**
+```http
+GET /api/metadata/search?genre=language
+GET /api/metadata/search?year=2018
+GET /api/metadata/search?authors=daniel
+GET /api/metadata/search?title=grammar
+GET /api/metadata/search?country=iraq
+```
+
+**Multi-Field Examples (AND logic):**
+```http
+GET /api/metadata/search?genre=language&year=2018
+GET /api/metadata/search?genre=literature&country=iraq
+GET /api/metadata/search?authors=daniel&year=2020
+```
+
+**Search Response Format:**
+```json
+{
+  "success": true,
+  "query": {
+    "genre": "language",
+    "year": "2018"
+  },
+  "results": [...],
+  "totalCount": 1,
+  "returnedCount": 1,
+  "hasMore": false,
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 1,
+    "hasNext": false
+  }
+}
 
 ### Response Format
 
@@ -336,8 +398,8 @@ When running in Docker, after editing configuration files:
 
 ```bash
 # Rebuild and restart backend service
-docker-compose build --no-cache backend
-docker-compose up -d backend
+docker compose build --no-cache backend
+docker compose up -d backend
 ```
 
 #### Development Mode Updates
@@ -372,6 +434,60 @@ Simply edit the corresponding JSON file in `server/data/`:
 - `source-options.json` - Add/remove source options
 
 No code changes required for existing dropdown fields!
+
+## Extending the Search System
+
+The search system uses the Strategy pattern for extensibility. To add new searchable fields:
+
+### Adding New Search Fields
+
+1. **Edit the search configuration** in `server/utils/search-engine.js`:
+
+```javascript
+// Add to the searchableFields object
+newField: {
+  path: 'metadata.newField',        // MongoDB document path
+  type: 'text',                     // Search strategy: exact, text, array, number, range
+  label: 'New Field',               // Display label for API docs
+  description: 'Search description', // Help text
+  validation: Joi.string().min(1)   // Joi validation schema
+}
+```
+
+2. **Available Search Types:**
+   - **exact**: Exact string match
+   - **text**: Case-insensitive regex search
+   - **array**: Search within array fields
+   - **number**: Numeric comparison
+   - **range**: Support range queries (e.g., "2020-2023")
+
+3. **Restart the backend** to apply changes:
+
+```bash
+# Development mode
+cd server && node index.js
+
+# Docker mode  
+docker compose restart backend
+```
+
+### Search Strategy Implementation
+
+The system automatically creates appropriate search strategies based on the field type. Custom strategies can be added by:
+
+1. Extending the `SearchStrategy` base class
+2. Adding the new type to `SearchStrategyFactory`
+3. Registering it in the search engine
+
+**Example Custom Strategy:**
+```javascript
+class CustomSearchStrategy extends SearchStrategy {
+  buildQuery(value) {
+    // Custom MongoDB query logic
+    return { [this.fieldConfig.path]: { $custom: value } };
+  }
+}
+```
 
 ### Database Operations
 
@@ -416,7 +532,7 @@ Check browser console and server logs for debugging information.
 2. **MongoDB connection failed**:
    ```bash
    # Restart MongoDB container
-   docker-compose restart mongodb
+   docker compose restart mongodb
    # Check container logs
    docker logs metadata-editor-mongodb
    ```
@@ -437,9 +553,9 @@ Check browser console and server logs for debugging information.
 
 ```bash
 # Stop and remove MongoDB container with data
-docker-compose down -v
+docker compose down -v
 # Restart with fresh database
-docker-compose up -d mongodb
+docker compose up -d mongodb
 ```
 
 ## Production Deployment
