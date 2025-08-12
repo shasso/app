@@ -25,6 +25,7 @@ A full-stack web application for managing and organizing metadata for corpus ite
 ## Technology Stack
 
 ### Frontend
+
 - **React 18** - Modern React with hooks
 - **TypeScript** - Type safety and better development experience
 - **Vite 4.5.3** - Fast build tool and development server
@@ -34,6 +35,7 @@ A full-stack web application for managing and organizing metadata for corpus ite
 - **Axios** - HTTP client for API calls
 
 ### Backend
+
 - **Node.js 18.18.0** - JavaScript runtime
 - **Express** - Web application framework
 - **MongoDB 7.0** - NoSQL database
@@ -43,12 +45,13 @@ A full-stack web application for managing and organizing metadata for corpus ite
 - **CORS** - Cross-origin resource sharing
 
 ### Infrastructure
+
 - **Docker** - Containerized MongoDB
 - **Docker Compose** - Multi-container orchestration
 
 ## Project Structure
 
-```
+```bash
 metadata-editor/
 ├── app/                          # Main application directory
 │   ├── src/                      # Frontend source code
@@ -121,11 +124,13 @@ cd metadata-editor/app
 ### 2. Install Dependencies
 
 #### Frontend Dependencies
+
 ```bash
 npm install
 ```
 
 #### Backend Dependencies
+
 ```bash
 cd server
 npm install
@@ -143,6 +148,7 @@ docker ps
 ```
 
 The MongoDB container will be available at:
+
 - **Host**: `localhost:27017`
 - **Database**: `metadata-editor`
 - **Username**: `admin`
@@ -157,6 +163,7 @@ node index.js
 ```
 
 The backend server will start on `http://localhost:5000` with the following endpoints:
+
 - `GET /api/metadata` - Get all records
 - `POST /api/metadata` - Create new record
 - `GET /api/metadata/:id` - Get record by ID
@@ -180,6 +187,7 @@ The frontend will be available at `http://localhost:5173`
 The application features a stunning, completely redesigned search interface that combines functionality with visual excellence:
 
 #### **🌈 Visual Design Elements**
+
 - **Gradient Backgrounds**: Breathtaking indigo-purple-pink gradients create an immersive visual experience
 - **Backdrop Blur Effects**: Modern glassmorphism design with sophisticated transparency layers
 - **Smooth Animations**: Elegant transform effects, hover states, and loading animations throughout
@@ -187,6 +195,7 @@ The application features a stunning, completely redesigned search interface that
 - **Consistent Spacing**: Clean, organized layout with harmonious visual balance
 
 #### **⚡ Interactive Components**
+
 - **Search Mode Toggle**: Beautiful button toggle between Quick and Advanced search modes with smooth transitions
 - **Visual Feedback System**: Instant clipboard copy notifications with success indicators and animations
 - **Hover Effects**: Subtle scale transforms and color transitions on interactive elements
@@ -196,14 +205,18 @@ The application features a stunning, completely redesigned search interface that
 #### **🔍 Smart Search Modes**
 
 ##### **Quick Search Mode**
+
 Perfect for rapid searches with commonly used fields:
+
 - **ID Search**: Lightning-fast exact match for record UUIDs with beautiful input styling
 - **Title Search**: Intelligent keyword-based title searching with enhanced visual feedback
 - **Clean Interface**: Focused, distraction-free design optimized for speed
 - **Gradient Indicators**: Color-coded field types (blue for ID, purple for title)
 
 ##### **Advanced Search Mode**
+
 Comprehensive search across all available fields with sophisticated UI:
+
 - **Multi-field Search**: Use any combination of available metadata fields simultaneously
 - **Smart Field Types**: Automatic handling for different data types with visual indicators
 - **Enhanced Icon System**: Comprehensive icon mapping for all search fields (Hash, BookOpen, Users, MapPin, etc.)
@@ -211,6 +224,7 @@ Comprehensive search across all available fields with sophisticated UI:
 - **Flexible Grid Layout**: Responsive 3-column grid that adapts to screen size
 
 #### **✨ Search Result Features**
+
 - **Stunning Result Cards**: Elegant metadata display with gradient borders and hover effects
 - **One-Click Actions**: View, Edit, and Delete buttons with gradient styling and transform animations
 - **Copy Functionality**: Instant ID copying with visual feedback and "✓ Copied" notifications
@@ -219,6 +233,7 @@ Comprehensive search across all available fields with sophisticated UI:
 - **Responsive Design**: Perfect display across desktop, tablet, and mobile devices
 
 #### **🎯 Enhanced UX Features**
+
 - **Search Statistics**: Beautiful result count display with gradient accents
 - **Active Filter Tags**: Visual representation of current search parameters with gradient styling
 - **Empty State Design**: Friendly "No Results Found" message with call-to-action buttons
@@ -226,17 +241,20 @@ Comprehensive search across all available fields with sophisticated UI:
 - **Loading Experience**: Comprehensive loading states with animated spinners and progress indicators
 
 #### **📱 Responsive Excellence**
+
 - **Mobile-First Design**: Optimized for touch interactions and mobile viewing
 - **Adaptive Layouts**: Grid systems that respond perfectly to any screen size
 - **Touch-Friendly Controls**: Properly sized buttons and inputs for mobile devices
 - **Consistent Experience**: Identical functionality across all device types
 
 ### Navigation
+
 - **Intuitive menu**: Clear navigation between dashboard, create, search, and records
 - **Breadcrumb trails**: Easy navigation within record editing
 - **Quick links**: Direct access to common actions
 
 ### Dashboard Features
+
 - **Statistics overview**: Total records, recent additions
 - **Recent records**: Quick access to latest entries
 - **Search shortcuts**: Direct links to search functionality
@@ -246,17 +264,20 @@ Comprehensive search across all available fields with sophisticated UI:
 ### Option 1: Manual Startup (Recommended for Development)
 
 1. **Start MongoDB**:
+
    ```bash
    docker compose up -d mongodb
    ```
 
 2. **Start Backend** (in terminal 1):
+
    ```bash
    cd server
    node index.js
    ```
 
 3. **Start Frontend** (in terminal 2):
+
    ```bash
    npm run dev
    ```
@@ -279,11 +300,13 @@ docker compose down
 ### Endpoints
 
 #### Get All Records
+
 ```http
 GET /api/metadata
 ```
 
 #### Create Record
+
 ```http
 POST /api/metadata
 Content-Type: application/json
@@ -298,11 +321,13 @@ Content-Type: application/json
 ```
 
 #### Get Record by ID
+
 ```http
 GET /api/metadata/{id}
 ```
 
 #### Update Record
+
 ```http
 PUT /api/metadata/{id}
 Content-Type: application/json
@@ -315,11 +340,13 @@ Content-Type: application/json
 ```
 
 #### Delete Record
+
 ```http
 DELETE /api/metadata/{id}
 ```
 
 #### Get Field Definitions
+
 ```http
 GET /api/metadata/fields
 ```
@@ -329,6 +356,7 @@ GET /api/metadata/fields
 The application includes an extensible search system that supports multiple search strategies.
 
 #### Get Available Search Fields
+
 ```http
 GET /api/metadata/search/fields
 ```
@@ -336,11 +364,13 @@ GET /api/metadata/search/fields
 Returns information about all searchable fields including labels, descriptions, and search types.
 
 #### Execute Search
+
 ```http
 GET /api/metadata/search?field=value&field2=value2
 ```
 
 **Available Search Fields:**
+
 - **id** (exact match) - Search by record UUID
 - **title** (text search) - Case-insensitive search in titles
 - **subtitle** (text search) - Case-insensitive search in subtitles
@@ -350,6 +380,7 @@ GET /api/metadata/search?field=value&field2=value2
 - **year** (number search) - Search by publication year
 
 **Single Field Examples:**
+
 ```http
 GET /api/metadata/search?genre=language
 GET /api/metadata/search?year=2018
@@ -359,6 +390,7 @@ GET /api/metadata/search?country=iraq
 ```
 
 **Multi-Field Examples (AND logic):**
+
 ```http
 GET /api/metadata/search?genre=language&year=2018
 GET /api/metadata/search?genre=literature&country=iraq
@@ -366,6 +398,7 @@ GET /api/metadata/search?authors=daniel&year=2020
 ```
 
 **Search Response Format:**
+
 ```json
 {
   "success": true,
@@ -384,12 +417,14 @@ GET /api/metadata/search?authors=daniel&year=2020
     "hasNext": false
   }
 }
+```
 
 ### Response Format
 
 All API responses follow this format:
 
 **Success Response:**
+
 ```json
 {
   "id": "uuid",
@@ -400,6 +435,7 @@ All API responses follow this format:
 ```
 
 **Error Response:**
+
 ```json
 {
   "error": "Error message description"
@@ -426,6 +462,70 @@ The application supports these predefined fields:
 - **pub_date** (year) - Publication year
 - **edition** (text) - Edition information
 
+## Edit Workflow & Core Field Bootstrap (Unreleased)
+
+The edit experience automatically ensures essential core fields are present, improving usability when legacy or sparse records are opened.
+
+### Core Field Auto-Bootstrap
+
+When opening a record whose metadata object is empty, the application auto-adds the following core fields (if they are defined in the field definitions service):
+
+```json
+["title", "subtitle", "authors", "genre", "year", "country"]
+```
+
+If you manually remove all fields, you can re-add them with the Add Core Fields button that appears in the empty state.
+
+### Canonical Routes
+
+- Dashboard: `/`
+- Create Record: `/create`
+- Search: `/search`
+- Edit Record: `/records/:id/edit` (replaces older `/edit/:id` form)
+- View Record (planned alignment): `/records/:id`
+
+### Editing Behavior
+
+- Save redirects back to the search page with the record ID pre-populated.
+- Empty strings and empty arrays are stripped before submission (only meaningful values are persisted).
+- Array fields (e.g. authors) always present at least one input row for convenience.
+
+## UI Primitives & Design System (Unreleased)
+
+A lightweight component + token layer standardizes styling and accelerates future UI work.
+
+### Primitive Components (Location: `src/components/ui/`)
+
+- `Button.tsx` – Variants: `solid`, `subtle`, `ghost`; Sizes: `sm`, `md`, `lg`; Built-in loading spinner.
+- `Input.tsx` – Consistent text input styling with optional error state class handling.
+- `Card.tsx` – Structural wrapper with `CardHeader`, `CardTitle`, `CardDescription`, `CardContent`, `CardFooter` subcomponents.
+
+Pages progressively migrate from raw HTML elements to these primitives for consistency, accessibility, and easier theming.
+
+### Design Tokens (`src/designTokens.ts`)
+
+Central source of semantic design values:
+
+- Color palette (neutral + indigo/purple accent spectrum)
+- Spacing scale
+- Radii & elevation layers
+- Focus ring + motion tokens
+- Typography scale
+
+The helper `buildCssVariables(tokens)` produces a map suitable for injecting as CSS variables (future global theming/dark mode expansion).
+
+### Adoption Status
+
+- Fully adopted: Search interface, Dashboard action elements, Edit record inputs (text & array), core action buttons.
+- Partial: Create form still mixes raw elements & primitives; Select fields currently native `<select>` elements (planned abstraction: `Select` component or headless + tokens approach).
+
+### Planned Enhancements
+
+- Dedicated `Select` & `Badge` components
+- Dark mode surface alignment using token-driven CSS variables
+- Accessible inline validation messaging component
+- Extraction of layout shell primitives (e.g., `PageHeader`, `Toolbar`)
+
 ## Development
 
 ### Configuring Dropdown Options
@@ -434,14 +534,17 @@ The application uses file-based configuration for dropdown field options, making
 
 #### Managing Dropdown Options
 
-**Location**: 
+**Location**:
+
 - `server/data/genre-options.json` - Genre dropdown options
 - `server/data/dialect-options.json` - Dialect dropdown options
 - `server/data/source-options.json` - Source dropdown options
 
 **To add new options**:
+
 1. Edit the appropriate JSON file
 2. Add new values to the array:
+
    ```json
    [
      "existing-option-1",
@@ -449,10 +552,12 @@ The application uses file-based configuration for dropdown field options, making
      "new-option-here"
    ]
    ```
+
 3. Restart the backend server (or rebuild Docker container)
 4. New options appear in dropdown menus
 
 **Example - Adding new genres**:
+
 ```json
 [
   "literature", "language", "new testament", "old testament",
@@ -462,6 +567,7 @@ The application uses file-based configuration for dropdown field options, making
 ```
 
 **Current available options**:
+
 - **Genre**: literature, language, new testament, old testament, magazine, apocrypha, academic, poetry, history, dictionary, religion, biography, folklore
 - **Dialect**: urmi, standard, other, jilu, tkhuma, baz
 - **Source**: private, online, published, manuscript, archive, library, personal collection, digital repository, book
@@ -490,11 +596,13 @@ node index.js
 ### Adding New Fields
 
 #### For Text/Number Fields:
+
 1. Update the Joi schema in `server/index.js`
 2. Add field definition in the `/api/metadata/fields` endpoint
 3. Update the frontend form components
 
 #### For New Dropdown Fields:
+
 1. Create a new JSON file in `server/data/` (e.g., `language-options.json`)
 2. Update `server/utils/options-loader.js` to include fallback options
 3. Update the Joi schema to use `loadOptions('your-field')`
@@ -502,7 +610,9 @@ node index.js
 5. Update the frontend form components
 
 #### Extending Existing Dropdown Fields:
+
 Simply edit the corresponding JSON file in `server/data/`:
+
 - `genre-options.json` - Add/remove genre options
 - `dialect-options.json` - Add/remove dialect options  
 - `source-options.json` - Add/remove source options
@@ -517,18 +627,19 @@ The search system uses the Strategy pattern for extensibility. To add new search
 
 1. **Edit the search configuration** in `server/utils/search-engine.js`:
 
-```javascript
-// Add to the searchableFields object
-newField: {
-  path: 'metadata.newField',        // MongoDB document path
-  type: 'text',                     // Search strategy: exact, text, array, number, range
-  label: 'New Field',               // Display label for API docs
-  description: 'Search description', // Help text
-  validation: Joi.string().min(1)   // Joi validation schema
-}
-```
+   ```javascript
+   // Add to the searchableFields object
+   newField: {
+     path: 'metadata.newField',        // MongoDB document path
+     type: 'text',                     // Search strategy: exact, text, array, number, range
+     label: 'New Field',               // Display label for API docs
+     description: 'Search description', // Help text
+     validation: Joi.string().min(1)   // Joi validation schema
+   }
+   ```
 
 2. **Available Search Types:**
+
    - **exact**: Exact string match
    - **text**: Case-insensitive regex search
    - **array**: Search within array fields
@@ -537,13 +648,13 @@ newField: {
 
 3. **Restart the backend** to apply changes:
 
-```bash
-# Development mode
-cd server && node index.js
+   ```bash
+   # Development mode
+   cd server && node index.js
 
-# Docker mode  
-docker compose restart backend
-```
+   # Docker mode  
+   docker compose restart backend
+   ```
 
 ### Search Strategy Implementation
 
@@ -554,6 +665,7 @@ The system automatically creates appropriate search strategies based on the fiel
 3. Registering it in the search engine
 
 **Example Custom Strategy:**
+
 ```javascript
 class CustomSearchStrategy extends SearchStrategy {
   buildQuery(value) {
@@ -597,6 +709,7 @@ Check browser console and server logs for debugging information.
 ### Common Issues
 
 1. **Port 5000 already in use**:
+
    ```bash
    # Find process using port 5000
    netstat -ano | findstr :5000
@@ -604,6 +717,7 @@ Check browser console and server logs for debugging information.
    ```
 
 2. **MongoDB connection failed**:
+
    ```bash
    # Restart MongoDB container
    docker compose restart mongodb
@@ -617,6 +731,7 @@ Check browser console and server logs for debugging information.
    - Verify API base URL in `src/utils/api.ts`
 
 4. **Docker permission issues**:
+
    ```bash
    # Ensure Docker is running
    docker --version
@@ -639,6 +754,7 @@ docker compose up -d mongodb
 Create `.env` files for production:
 
 **Backend (.env)**:
+
 ```env
 PORT=5000
 MONGODB_URI=mongodb://admin:password123@mongodb:27017/metadata-editor?authSource=admin
@@ -646,6 +762,7 @@ NODE_ENV=production
 ```
 
 **Frontend (.env)**:
+
 ```env
 VITE_API_URL=https://your-api-domain.com/api
 ```
@@ -678,12 +795,13 @@ For support, please create an issue in the repository or contact the development
 
 ---
 
-**Last Updated**: August 10, 2025
+**Last Updated**: August 12, 2025
 **Version**: 1.3.0
 
 ## Version History
 
 ### v1.3.0 (Current) - Beautiful Search Interface Redesign
+
 - 🎨 **Completely Redesigned Search UI**: Stunning modern interface with sophisticated gradient backgrounds (indigo-purple-pink)
 - ✨ **Enhanced Visual Design**: Backdrop blur effects, smooth transform animations, elegant typography, and perfect spacing
 - 🔄 **Search Mode Toggle**: Seamless switching between Quick Search and Advanced Search modes with beautiful transitions
@@ -694,6 +812,7 @@ For support, please create an issue in the repository or contact the development
 - 🌈 **Modern Design Language**: Glassmorphism effects, gradient-based design system, consistent visual hierarchy
 
 ### v1.2.0 - Advanced Search & Modern UI Foundation
+
 - ✨ **Modern Search Interface**: Initial gradient backgrounds, search mode toggles, visual feedback
 - 🔍 **Extensible Search System**: Strategy pattern implementation with 7 searchable fields
 - 🎨 **UI/UX Improvements**: Basic styling updates, responsive design foundations
@@ -703,6 +822,7 @@ For support, please create an issue in the repository or contact the development
 - 🐳 **Modern Docker Compose**: Updated to use current syntax without deprecated version attribute
 
 ### v1.1.0 - Core Functionality
+
 - Basic CRUD operations for metadata records
 - MongoDB integration with health checks
 - Docker containerization
@@ -710,10 +830,12 @@ For support, please create an issue in the repository or contact the development
 - Node.js Express backend
 
 ### v1.0.0 - Initial Release
+
 - Basic metadata editor functionality
 - Simple record management
 
 Features added in v1.3.0:
+
 - Completely redesigned search interface with stunning indigo-purple-pink gradients
 - Enhanced visual design with backdrop blur effects and smooth animations
 - Search mode toggle with seamless transitions between Quick and Advanced modes
