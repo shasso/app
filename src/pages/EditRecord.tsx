@@ -1,6 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Plus, Minus, Save, X, Trash2 } from 'lucide-react';
+import { Button } from '../components/ui/Button';
+import { Input } from '../components/ui/Input';
 import { metadataApi } from '../utils/api';
 import type { FieldDefinition, MetadataRecord } from '../types';
 
@@ -16,6 +18,9 @@ const EditRecord = () => {
   const [error, setError] = useState<string | null>(null);
   const [loadingRecord, setLoadingRecord] = useState(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [definitionsLoaded, setDefinitionsLoaded] = useState(false);
+
+  const defaultCoreFields = ['title','subtitle','authors','genre','year','country'];
 
   useEffect(() => {
     const fetchData = async () => {
@@ -35,6 +40,7 @@ const EditRecord = () => {
         setFieldDefinitions(definitions.predefinedFields);
         setFormData(recordData.metadata || {});
         setActiveFields(Object.keys(recordData.metadata || {}));
+        setDefinitionsLoaded(true);
       } catch (err: any) {
         console.error('Error fetching data:', err);
         if (err.response?.status === 404) {
@@ -49,6 +55,23 @@ const EditRecord = () => {
 
     fetchData();
   }, [id]);
+
+  // Auto-add defaults if empty
+  useEffect(() => {
+    if (definitionsLoaded && record && activeFields.length === 0) {
+      const existingNames = new Set(fieldDefinitions.map(f => f.name));
+      const toAdd = defaultCoreFields.filter(f => existingNames.has(f));
+      if (toAdd.length) {
+        setActiveFields(toAdd);
+      }
+    }
+  }, [definitionsLoaded, record, activeFields.length, fieldDefinitions]);
+
+  const addDefaultCoreFields = useCallback(() => {
+    const existingNames = new Set(fieldDefinitions.map(f => f.name));
+    const toAdd = defaultCoreFields.filter(f => existingNames.has(f) && !activeFields.includes(f));
+    if (toAdd.length) setActiveFields(prev => [...prev, ...toAdd]);
+  }, [fieldDefinitions, activeFields]);
 
   const handleFieldChange = (fieldName: string, value: any) => {
     setFormData(prev => ({
@@ -192,12 +215,11 @@ const EditRecord = () => {
           </div>
           {arrayValue.map((item: string, index: number) => (
             <div key={index} className="flex gap-2">
-              <input
+              <Input
                 type="text"
                 value={item}
                 onChange={(e) => handleArrayFieldChange(fieldName, index, e.target.value)}
                 placeholder={`${fieldDef.label} ${index + 1}`}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 maxLength={fieldDef.maxLength}
               />
               {arrayValue.length > 1 && (
@@ -241,7 +263,7 @@ const EditRecord = () => {
           <select
             value={value || ''}
             onChange={(e) => handleFieldChange(fieldName, e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full rounded-lg border border-neutral-300/70 dark:border-neutral-600 bg-white/80 dark:bg-neutral-800/70 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           >
             <option value="">Select {fieldDef.label}</option>
             {fieldDef.options?.map(option => (
@@ -267,13 +289,12 @@ const EditRecord = () => {
               <X className="h-4 w-4" />
             </button>
           </div>
-          <input
+          <Input
             type="number"
             value={value || ''}
             onChange={(e) => handleFieldChange(fieldName, e.target.value ? parseInt(e.target.value) : undefined)}
             min={fieldDef.min}
             max={fieldDef.max}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
       );
@@ -295,11 +316,10 @@ const EditRecord = () => {
             <X className="h-4 w-4" />
           </button>
         </div>
-        <input
+        <Input
           type="text"
           value={value || ''}
           onChange={(e) => handleFieldChange(fieldName, e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           maxLength={fieldDef?.maxLength || 500}
         />
       </div>
@@ -361,20 +381,25 @@ const EditRecord = () => {
 
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Active Fields */}
-        <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">Metadata Fields</h2>
+        <div className="bg-white dark:bg-neutral-800/70 rounded-lg shadow-md border border-gray-200 dark:border-neutral-700/60 p-6">
+          <h2 className="text-lg font-medium text-gray-900 dark:text-neutral-100 mb-4">Metadata Fields</h2>
           <div className="space-y-6">
             {activeFields.length > 0 ? (
               activeFields.map(fieldName => renderField(fieldName))
             ) : (
-              <p className="text-gray-500 italic">No fields added yet. Add fields below to get started.</p>
+              <div className="text-center space-y-4 py-6">
+                <p className="text-gray-500 dark:text-neutral-400 text-sm">No fields selected yet.</p>
+                <Button type="button" variant="solid" size="sm" onClick={addDefaultCoreFields}>
+                  <Plus className="h-4 w-4" /> Add Core Fields
+                </Button>
+              </div>
             )}
           </div>
         </div>
 
         {/* Add Fields */}
-        <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">Add Fields</h2>
+        <div className="bg-white dark:bg-neutral-800/70 rounded-lg shadow-md border border-gray-200 dark:border-neutral-700/60 p-6">
+          <h2 className="text-lg font-medium text-gray-900 dark:text-neutral-100 mb-4">Add Fields</h2>
           
           {/* Predefined Fields */}
           {availableFields.length > 0 && (
@@ -400,47 +425,46 @@ const EditRecord = () => {
           <div>
             <h3 className="text-sm font-medium text-gray-700 mb-3">Custom Field</h3>
             <div className="flex gap-3">
-              <input
+              <Input
                 type="text"
                 value={customFieldName}
                 onChange={(e) => setCustomFieldName(e.target.value)}
                 placeholder="Enter custom field name"
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="flex-1"
               />
-              <button
+              <Button
                 type="button"
                 onClick={addCustomField}
                 disabled={!customFieldName || activeFields.includes(customFieldName)}
-                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center"
+                variant="solid"
               >
-                <Plus className="h-4 w-4 mr-2" />
-                Add
-              </button>
+                <Plus className="h-4 w-4" /> Add
+              </Button>
             </div>
           </div>
         </div>
 
         {/* Submit Button */}
         <div className="flex justify-between">
-          <button
+          <Button
             type="button"
             onClick={() => navigate('/')}
-            className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            variant="subtle"
           >
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
             type="submit"
             disabled={loading}
-            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center"
+            variant="solid"
           >
             {loading ? (
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
             ) : (
-              <Save className="h-4 w-4 mr-2" />
+              <Save className="h-4 w-4" />
             )}
             Save Changes
-          </button>
+          </Button>
         </div>
       </form>
 
